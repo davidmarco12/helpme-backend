@@ -9,5 +9,7 @@
 
         public int? OrganizacionId { get; set; }
         public Organizacion? Organizacion { get; set;}
+        
+        public List<Imagen> Imagenes { get; set; } = new List<Imagen>();
     }
 }
