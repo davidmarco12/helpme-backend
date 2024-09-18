@@ -35,7 +35,7 @@ namespace helpme.Controllers
             _context.Usuario.Add(usuario);
             await _context.SaveChangesAsync();
 
-            if (usuario.TipoDeUsuario == "Contribuyente")
+            if (usuario.TipoDeUsuario == "contribuyente")
             {
                 var contribuyente = new Contribuyente
                 {

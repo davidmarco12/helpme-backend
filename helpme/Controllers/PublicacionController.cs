@@ -7,19 +7,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using helpme.Models;
 using Microsoft.AspNetCore.Authorization;
+using Azure.Storage.Blobs;
+using helpme.Helpers;
 
 namespace helpme.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/publicacion")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class PublicacionController : ControllerBase
     {
+       
         private readonly ApplicationDbContext _context;
+        private readonly FileService _fileService;
 
-        public PublicacionController(ApplicationDbContext context)
+        public PublicacionController(ApplicationDbContext context, FileService fileService)
         {
             _context = context;
+            _fileService = fileService;
         }
 
         // GET: api/Publicacion
@@ -105,5 +110,18 @@ namespace helpme.Controllers
         {
             return _context.Publicacion.Any(e => e.Id == id);
         }
+
+        [HttpPost]
+        [Route("upload")]
+        public async Task<IActionResult> UploadFile(IFormFile file)
+        {
+            var result = await _fileService.UploadAsync(file);
+            return Ok(result);
+        }
     }
+
+    
+
+
+
 }
