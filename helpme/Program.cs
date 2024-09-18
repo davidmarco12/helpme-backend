@@ -4,9 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using ElmahCore.Mvc;
-using ElmahCore;
 using Microsoft.OpenApi.Models;
+using helpme.Data;
 
 
 
@@ -101,7 +100,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseElmahExceptionPage();
+    app.ApplyMigrations();
 }
 
 app.UseHttpsRedirection();

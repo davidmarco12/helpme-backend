@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  database.server:
+    image: "mcr.microsoft.com/mssql/server:2019-latest"
+    container_name: database.server
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=y
+      - SA_PASSWORD=SuperPassword123
+    volumes:
+      - ./sqlserver/data:/var/opt/mssql/data
+      - ./sqlserver/log:/var/opt/mssql/log
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "SuperPassword123" -Q "SELECT 1" -b -o /dev/null
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s  
+  webapp:
+    build: .
+    container_name: webapp
+    depends_on:
+      - database.server
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=5000
+      # - ASPNETCORE_HTTPS_PORTS=5001
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+  # admin:
+  #   image: adminer
+  #   restart: always
+  #   depends_on: 
+  #     - database.server
+  #   ports:
+  #     - 8080:8080
+volumes:
+  database:
