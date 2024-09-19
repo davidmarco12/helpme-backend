@@ -22,11 +22,6 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<FileService>();
 
-//builder.Services.AddElmah<XmlFileErrorLog>(options =>
-//{
-//    options.LogPath = "~/log"; // OR options.LogPath = "с:\errors";
-//});
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -107,7 +102,7 @@ app.UseCors("AllowAll");
 
 app.UseSwagger();
 app.UseSwaggerUI();
-app.ApplyMigrations();
+//app.ApplyMigrations();
 
 app.MapHealthChecks("/health");
 
