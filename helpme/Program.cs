@@ -102,7 +102,7 @@ app.UseCors("AllowAll");
 
 app.UseSwagger();
 app.UseSwaggerUI();
-//app.ApplyMigrations();
+app.ApplyMigrations();
 
 app.MapHealthChecks("/health");
 
