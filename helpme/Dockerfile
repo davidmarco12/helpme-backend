@@ -9,8 +9,6 @@ COPY ["helpme.csproj", "./"]
 RUN dotnet restore "./helpme.csproj"
 COPY . .
 
-# Instalar herramientas globales
-RUN dotnet tool install --global dotnet-ef --version 8.0.6
 
 
 WORKDIR /src
