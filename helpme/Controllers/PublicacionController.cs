@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -82,12 +82,30 @@ namespace helpme.Controllers
         // POST: api/Publicacion
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Publicacion>> PostPublicacion(Publicacion publicacion)
+        public async Task<ActionResult<Publicacion>> PostPublicacion(PublicacionRequestDTO publicacion)
         {
-            _context.Publicacion.Add(publicacion);
+
+            if (publicacion.OrganizacionId.HasValue)
+            {
+                var organizacionExiste = await _context.Organizacion
+                    .AnyAsync(o => o.Id == publicacion.OrganizacionId.Value);
+                if (!organizacionExiste)
+                {
+                    return BadRequest("La organización especificada no existe.");
+                }
+            }
+
+
+            var publicacionPost = new Publicacion
+            {
+                Contenido = publicacion.Contenido,
+                OrganizacionId = publicacion.OrganizacionId,
+            };
+
+            _context.Publicacion.Add(publicacionPost);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPublicacion", new { id = publicacion.Id }, publicacion);
+            return CreatedAtAction("GetPublicacion", new { id = publicacionPost.Id }, publicacionPost);
         }
 
         // DELETE: api/Publicacion/5
@@ -118,6 +136,13 @@ namespace helpme.Controllers
             var result = await _fileService.UploadAsync(file);
             return Ok(result);
         }
+    }
+
+
+    public class PublicacionRequestDTO
+    {
+        public string Contenido { get; set; } = string.Empty;
+        public int? OrganizacionId { get; set; }
     }
 
     

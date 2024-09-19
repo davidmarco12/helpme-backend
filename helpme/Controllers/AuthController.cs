@@ -46,7 +46,6 @@ namespace helpme.Controllers
                 };
 
                 _context.Contribuyente.Add(contribuyente);
-                await _context.SaveChangesAsync();
             }
             else
             {
@@ -63,8 +62,9 @@ namespace helpme.Controllers
                 };
 
                 _context.Organizacion.Add(organizacion);
-                await _context.SaveChangesAsync();
             }
+
+            await _context.SaveChangesAsync();
 
             return Ok(new { Message = "Usuario registrado correctamente" });
         }
