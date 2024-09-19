@@ -9,6 +9,7 @@ using helpme.Models;
 using Microsoft.AspNetCore.Authorization;
 using Azure.Storage.Blobs;
 using helpme.Helpers;
+using System.ComponentModel.DataAnnotations;
 
 namespace helpme.Controllers
 {
@@ -98,6 +99,7 @@ namespace helpme.Controllers
 
             var publicacionPost = new Publicacion
             {
+                Titulo = publicacion.Titulo,
                 Contenido = publicacion.Contenido,
                 OrganizacionId = publicacion.OrganizacionId,
             };
@@ -141,6 +143,7 @@ namespace helpme.Controllers
 
     public class PublicacionRequestDTO
     {
+        public string Titulo { get; set; } = string.Empty;
         public string Contenido { get; set; } = string.Empty;
         public int? OrganizacionId { get; set; }
     }
