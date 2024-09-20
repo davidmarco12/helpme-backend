@@ -102,6 +102,7 @@ namespace helpme.Controllers
                 Titulo = publicacion.Titulo,
                 Contenido = publicacion.Contenido,
                 OrganizacionId = publicacion.OrganizacionId,
+                DescripcionDonacion = publicacion.DetallePago,
             };
 
             _context.Publicacion.Add(publicacionPost);
@@ -145,6 +146,7 @@ namespace helpme.Controllers
     {
         public string Titulo { get; set; } = string.Empty;
         public string Contenido { get; set; } = string.Empty;
+        public string DetallePago { get; set; } = string.Empty;
         public int? OrganizacionId { get; set; }
     }
 
