@@ -30,14 +30,14 @@ namespace helpme.Controllers
             try
             {
 
-                var usuarioExistente = await _context.Usuario
-                    .FirstOrDefaultAsync(u => u.User == usuarioDTO.User || u.Email == usuarioDTO.Email);
+                //var usuarioExistente = await _context.Usuario
+                //    .FirstOrDefaultAsync(u => u.User == usuarioDTO.User || u.Email == usuarioDTO.Email);
 
-                if (usuarioExistente != null)
-                {
-                    // Si el usuario existe, puedes retornar un error o manejarlo como desees.
-                    return BadRequest("El usuario ya existe con ese nombre de usuario o email.");
-                }
+                //if (usuarioExistente != null)
+                //{
+                //    // Si el usuario existe, puedes retornar un error o manejarlo como desees.
+                //    return BadRequest("El usuario ya existe con ese nombre de usuario o email.");
+                //}
 
 
                 var usuario = new Usuario
