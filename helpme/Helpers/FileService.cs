@@ -1,21 +1,24 @@
 ﻿using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using System.Configuration;
 
 namespace helpme.Helpers
 {
     public class FileService
     {
         private readonly string _storageAccount = "helpmestorage";
-        private readonly string _key = "";
+        //private readonly string _key = Configuration.GetConnectionString("ApplicationDbContext");
         private readonly BlobContainerClient _filesContainer;
-
-        public FileService()
+        private readonly IConfiguration _config;
+        public FileService(IConfiguration configuration)
         {
-            var credencial = new StorageSharedKeyCredential(_storageAccount, _key);
+            _config = configuration;
+            var credencial = new StorageSharedKeyCredential(_storageAccount, _config.GetConnectionString("AzureStorage"));
             var blobUri = $"https://{_storageAccount}.blob.core.windows.net";
             var blobServiceClient = new BlobServiceClient(new Uri(blobUri), credencial);
             _filesContainer = blobServiceClient.GetBlobContainerClient("testing-helpme");
+            
         }
 
         public async Task<BlobResponseDto> UploadAsync(IFormFile blob)

@@ -1,4 +1,5 @@
-﻿using helpme.Models;
+﻿using helpme.Helpers;
+using helpme.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -14,59 +15,74 @@ namespace helpme.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly FileService _fileService;
 
-        public AuthController(ApplicationDbContext context, IConfiguration configuration)
+        public AuthController(ApplicationDbContext context, IConfiguration configuration, FileService fileService)
         {
             _context = context;
             _configuration = configuration;
+            _fileService = fileService;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterUsuarioDTO usuarioDTO)
+        public async Task<IActionResult> Register([FromForm] RegisterUsuarioDTO usuarioDTO)
         {
-            var usuario = new Usuario
+            try
             {
-                User = usuarioDTO.User,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(usuarioDTO.Password), //Hasheo la password
-                TipoDeUsuario = usuarioDTO.TipoDeUsuario,
-                Email = usuarioDTO.Email,
-            };
+                var result = await _fileService.UploadAsync(usuarioDTO.ImageFile);
 
-            _context.Usuario.Add(usuario);
-            await _context.SaveChangesAsync();
-
-            if (usuario.TipoDeUsuario == "contribuyente")
-            {
-                var contribuyente = new Contribuyente
+                var usuario = new Usuario
                 {
-                    Nombre = usuarioDTO.Nombre,
-                    Apellido = usuarioDTO.Apellido,
-                    FechaNacimiento = usuarioDTO.FechaNacimiento,
-                    IdUsuario = usuario.Id,
+                    User = usuarioDTO.User,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(usuarioDTO.Password), //Hasheo la password
+                    TipoDeUsuario = usuarioDTO.TipoDeUsuario,
+                    Email = usuarioDTO.Email,
+                    UrlImagen = result.Blob.Uri ?? "",
                 };
 
-                _context.Contribuyente.Add(contribuyente);
-            }
-            else
-            {
-                var organizacion = new Organizacion
+                _context.Usuario.Add(usuario);
+                await _context.SaveChangesAsync();
+
+                if (usuario.TipoDeUsuario == "contribuyente")
                 {
-                    NombreOrganizacion = usuarioDTO.NombreOrganizacion,
-                    Descripcion = usuarioDTO.Descripcion,
-                    CUIT = usuarioDTO.CUIT,
-                    Localidad = usuarioDTO.Localidad,
-                    CodigoPostal = usuarioDTO.CodigoPostal,
-                    Provincia = usuarioDTO.Provincia,
-                    FechaDeCreacion = usuarioDTO.FechaDeCreacion,
-                    IdUsuario = usuario.Id,
-                };
+                    var contribuyente = new Contribuyente
+                    {
+                        Nombre = usuarioDTO.Nombre,
+                        Apellido = usuarioDTO.Apellido,
+                        FechaNacimiento = usuarioDTO.FechaNacimiento,
+                        IdUsuario = usuario.Id,
+                    };
 
-                _context.Organizacion.Add(organizacion);
+                    _context.Contribuyente.Add(contribuyente);
+                }
+                else
+                {
+                    var organizacion = new Organizacion
+                    {
+                        NombreOrganizacion = usuarioDTO.NombreOrganizacion,
+                        Descripcion = usuarioDTO.Descripcion,
+                        CUIT = usuarioDTO.CUIT,
+                        Localidad = usuarioDTO.Localidad,
+                        CodigoPostal = usuarioDTO.CodigoPostal,
+                        Provincia = usuarioDTO.Provincia,
+                        FechaDeCreacion = usuarioDTO.FechaDeCreacion,
+                        IdUsuario = usuario.Id,
+                    };
+
+                    _context.Organizacion.Add(organizacion);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { Message = "Usuario registrado correctamente" });
+            }
+            catch (Exception ex)
+            {
+
+                return Problem("Hubo un error al registrar un usuario");
             }
 
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Message = "Usuario registrado correctamente" });
+           
         }
 
         [HttpPost("login")]
@@ -130,5 +146,6 @@ namespace helpme.Controllers
         public string Nombre { get; set; } = string.Empty;
         public string Apellido { get; set; } = string.Empty;
         public DateTime FechaNacimiento { get; set; }
+        public IFormFile? ImageFile { get; set; }
     }
 }
