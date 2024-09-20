@@ -25,11 +25,20 @@ namespace helpme.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromForm] RegisterUsuarioDTO usuarioDTO)
+        public async Task<IActionResult> Register([FromBody] RegisterUsuarioDTO usuarioDTO)
         {
             try
             {
-                var result = await _fileService.UploadAsync(usuarioDTO.ImageFile);
+
+                var usuarioExistente = await _context.Usuario
+                    .FirstOrDefaultAsync(u => u.User == usuarioDTO.User || u.Email == usuarioDTO.Email);
+
+                if (usuarioExistente != null)
+                {
+                    // Si el usuario existe, puedes retornar un error o manejarlo como desees.
+                    return BadRequest("El usuario ya existe con ese nombre de usuario o email.");
+                }
+
 
                 var usuario = new Usuario
                 {
@@ -37,7 +46,6 @@ namespace helpme.Controllers
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(usuarioDTO.Password), //Hasheo la password
                     TipoDeUsuario = usuarioDTO.TipoDeUsuario,
                     Email = usuarioDTO.Email,
-                    UrlImagen = result.Blob.Uri ?? "",
                 };
 
                 _context.Usuario.Add(usuario);
@@ -54,6 +62,9 @@ namespace helpme.Controllers
                     };
 
                     _context.Contribuyente.Add(contribuyente);
+
+                    await _context.SaveChangesAsync();
+                    return Ok(new { usuario = contribuyente });
                 }
                 else
                 {
@@ -70,11 +81,9 @@ namespace helpme.Controllers
                     };
 
                     _context.Organizacion.Add(organizacion);
+                    await _context.SaveChangesAsync();
+                    return Ok(new { usuario = organizacion });
                 }
-
-                await _context.SaveChangesAsync();
-
-                return Ok(new { Message = "Usuario registrado correctamente" });
             }
             catch (Exception ex)
             {
@@ -146,6 +155,5 @@ namespace helpme.Controllers
         public string Nombre { get; set; } = string.Empty;
         public string Apellido { get; set; } = string.Empty;
         public DateTime FechaNacimiento { get; set; }
-        public IFormFile? ImageFile { get; set; }
     }
 }
