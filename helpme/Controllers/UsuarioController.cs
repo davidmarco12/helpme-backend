@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using helpme.Models;
+using helpme.Helpers;
 
 namespace helpme.Controllers
 {
@@ -9,11 +10,12 @@ namespace helpme.Controllers
     public class UsuarioController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly FileService _fileService;
 
-
-        public UsuarioController(ApplicationDbContext context)
+        public UsuarioController(ApplicationDbContext context, FileService fileService)
         {
             _context = context;
+            _fileService = fileService;
         }
 
         // GET: api/Usuario
@@ -89,9 +91,31 @@ namespace helpme.Controllers
         {
             return _context.Usuario.Any(e => e.Id == id);
         }
+
+        [HttpPut("cambiar-perfil/{id}")]
+        public async Task<IActionResult> ChangeImageURL([FromRoute] int id, [FromForm] AddDataModel imagen)
+        {
+            var result = await _fileService.UploadAsync(imagen.File);
+
+            var usuario = _context.Usuario.Find(id);
+
+            if(usuario == null) return NotFound("Usuario no encontrado, por favor intenta con otro");
+
+            usuario.UrlImagen = result.Blob.Uri;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(usuario);
+        }
+
+
+        public class AddDataModel
+        {
+            public IFormFile File { get; set; }
+        }
     }
 
 
-    
+
 
 }

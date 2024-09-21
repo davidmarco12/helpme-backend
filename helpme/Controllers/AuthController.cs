@@ -104,7 +104,7 @@ namespace helpme.Controllers
             }
 
             var token = GenerateJwtToken(usuario);
-            return Ok(new { Token = token });
+            return Ok(new { Token = token, Usuario = usuario });
         }
 
         private string GenerateJwtToken(Usuario usuario)
