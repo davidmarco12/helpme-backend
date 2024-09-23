@@ -76,7 +76,7 @@ namespace helpme.Controllers
             {
                 BackUrls = new PreferenceBackUrlsRequest
                 {
-                    Success = "https://dexus-web.com:3000/publication/" + donacion.PublicacionID + "?donadorID="+ donacionId,
+                    Success = "helpme-front-anb9crbzfgh6b9c7.brazilsouth-01.azurewebsites.net/publication/" + donacion.PublicacionID + "?donadorID="+ donacionId,
                     Failure = "http://test.com/failure",
                     Pending = "http://test.com/pending"
                 },
