@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,12 +7,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using helpme.Models;
 using Microsoft.AspNetCore.Authorization;
+using helpme.Migrations;
+using MercadoPago.Client.Preference;
+using MercadoPago.Config;
+using MercadoPago.Resource.Preference;
 
 namespace helpme.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/donacion")]
     [ApiController]
-    [Authorize]
     public class DonacionController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -43,17 +46,82 @@ namespace helpme.Controllers
             return donacion;
         }
 
-        // PUT: api/Donacion/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutDonacion(int id, Donacion donacion)
+        [HttpPost("/crear-donacion")]
+        public async Task<ActionResult> CreateDonacion([FromBody] RequestDonacionDTO donacion)
         {
-            if (id != donacion.Id)
+
+            var organizacion = await _context.Organizacion
+                    .FirstOrDefaultAsync(o => o.Id == donacion.OrganizacionID);
+            if (organizacion == null)
             {
-                return BadRequest();
+                return BadRequest("La organización especificada no existe.");
             }
 
-            _context.Entry(donacion).State = EntityState.Modified;
+            var donacionNueva = await _context.Donacion.AddAsync(new Donacion
+            {
+                Cantidad = donacion.Cantidad,
+                ContribuyenteId = donacion.ContribuyenteID,
+                MetodoPago = "MercadoPago",
+                PublicacionId = donacion.PublicacionID,
+                Mensaje = donacion.Mensaje,
+                Estado = false,
+            });
+
+            await _context.SaveChangesAsync();
+
+            var donacionId = donacionNueva.Entity.Id;
+
+            MercadoPagoConfig.AccessToken = organizacion.MercadoPagoCode;
+            PreferenceRequest request = new PreferenceRequest
+            {
+                BackUrls = new PreferenceBackUrlsRequest
+                {
+                    Success = "https://dexus-web.com:7146/api/donacion/actualizar-donacion?id=" + donacionId,
+                    Failure = "http://test.com/failure",
+                    Pending = "http://test.com/pending"
+                },
+                DifferentialPricing = new PreferenceDifferentialPricingRequest
+                {
+                    Id = 1
+                },
+                Expires = false,
+                Items = new List<PreferenceItemRequest>
+                    {
+                    new PreferenceItemRequest
+                        {
+                            Id = "1234",
+                            Title = donacion.Titulo,
+                            Description = "Donacion para ONG",
+                            PictureUrl = "http://www.myapp.com/myimage.jpg",
+                            CategoryId = "car_electronics",
+                            Quantity = 1,
+                            CurrencyId = "ARS",
+                            UnitPrice = donacion.Cantidad
+                        }
+                    },
+            };
+            PreferenceClient client = new PreferenceClient();
+            Preference preference = client.Create(request);
+
+            var publicacion = await _context.Publicacion.FirstOrDefaultAsync(p => p.Id == donacion.PublicacionID.Value);
+
+            publicacion.ReferenciaDePago = preference.InitPoint;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(preference.InitPoint);
+        }
+
+        // PUT: api/Donacion/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpGet("actualizar-donacion")]
+        public async Task<IActionResult> PutDonacion([FromQuery] int id)
+        {
+            var donacion = _context.Donacion.Find(id);
+
+            if (donacion == null) return Problem("No existe la donacion");
+
+            donacion.Estado = true;
 
             try
             {
@@ -61,17 +129,10 @@ namespace helpme.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!DonacionExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return Problem("Problema con la donacion");
             }
 
-            return NoContent();
+            return Ok("Donacion Creada");
         }
 
         // POST: api/Donacion
@@ -105,5 +166,18 @@ namespace helpme.Controllers
         {
             return _context.Donacion.Any(e => e.Id == id);
         }
+
+
+        public class RequestDonacionDTO 
+        { 
+            public string? Mensaje  { get; set; }
+            public decimal Cantidad { get; set; }
+            public string? Titulo { get; set; }
+            public int? OrganizacionID { get; set; }
+            public int? PublicacionID { get; set; }
+            public int? ContribuyenteID { get; set; }
+        }
+
+
     }
 }

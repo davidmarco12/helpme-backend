@@ -105,5 +105,34 @@ namespace helpme.Controllers
         {
             return _context.Organizacion.Any(e => e.Id == id);
         }
+
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> SyncMercadoPago(int id, Organizacion organizacion)
+        //{
+        //    if (id != organizacion.Id)
+        //    {
+        //        return BadRequest();
+        //    }
+
+        //    _context.Entry(organizacion).State = EntityState.Modified;
+
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!OrganizacionExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
+
+        //    return NoContent();
+        //}
     }
 }

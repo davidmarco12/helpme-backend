@@ -35,5 +35,9 @@ using helpme.Models;
             modelBuilder.Entity<Contribuyente>()
                 .ToTable("Contribuyentes")
                 .HasBaseType<Usuario>();
-        }
+
+            modelBuilder.Entity<Publicacion>()
+            .Property(p => p.FechaCreacion)
+            .HasDefaultValueSql("NOW()");
+    }
 }

@@ -1,4 +1,6 @@
-﻿namespace helpme.Models
+﻿using System.Text.Json.Serialization;
+
+namespace helpme.Models
 {
     public class Publicacion
     {
@@ -9,6 +11,9 @@
         public DateTime? FechaCreacion { get; set; }
         public int? OrganizacionId { get; set; }
         public string? DescripcionDonacion { get; set; }
+        public string? ReferenciaDePago { get; set; }
+
+        [JsonIgnore]
         public Organizacion? Organizacion { get; set;}
         public List<Imagen>? Imagenes { get; set; } = new List<Imagen>();
     }

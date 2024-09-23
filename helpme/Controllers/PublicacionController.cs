@@ -10,6 +10,10 @@ using Microsoft.AspNetCore.Authorization;
 using Azure.Storage.Blobs;
 using helpme.Helpers;
 using System.ComponentModel.DataAnnotations;
+using MercadoPago.Client.Common;
+using MercadoPago.Client.Preference;
+using MercadoPago.Config;
+using MercadoPago.Resource.Preference;
 
 namespace helpme.Controllers
 {
@@ -85,30 +89,66 @@ namespace helpme.Controllers
         [HttpPost]
         public async Task<ActionResult<Publicacion>> PostPublicacion(PublicacionRequestDTO publicacion)
         {
-
             if (publicacion.OrganizacionId.HasValue)
             {
-                var organizacionExiste = await _context.Organizacion
-                    .AnyAsync(o => o.Id == publicacion.OrganizacionId.Value);
-                if (!organizacionExiste)
+                var organizacion = await _context.Organizacion
+                    .FirstOrDefaultAsync(o => o.Id == publicacion.OrganizacionId.Value);
+                if (organizacion == null)
                 {
                     return BadRequest("La organización especificada no existe.");
                 }
+
+                //MercadoPagoConfig.AccessToken = organizacion.MercadoPagoCode;
+                //PreferenceRequest request = new PreferenceRequest
+                //{
+                //    BackUrls = new PreferenceBackUrlsRequest
+                //    {
+                //        Success = "http://test.com/success",
+                //        Failure = "http://test.com/failure",
+                //        Pending = "http://test.com/pending"
+                //    },
+                //    DifferentialPricing = new PreferenceDifferentialPricingRequest
+                //        {
+                //            Id = 1
+                //        },
+                //    Expires = false,
+                //    Items = new List<PreferenceItemRequest>
+                //    {
+                //    new PreferenceItemRequest
+                //        {
+                //            Id = "1234",
+                //            Title = publicacion.Titulo,
+                //            Description = "Donacion para ONG",
+                //            PictureUrl = "http://www.myapp.com/myimage.jpg",
+                //            CategoryId = "car_electronics",
+                //            Quantity = 1,
+                //            CurrencyId = "ARS",
+                //            UnitPrice = 10000
+                //        }
+                //    },
+                //};
+                //PreferenceClient client = new PreferenceClient();
+                //Preference preference = client.Create(request);
+
+                var publicacionPost = new Publicacion
+                {
+                    Titulo = publicacion.Titulo,
+                    Contenido = publicacion.Contenido,
+                    OrganizacionId = publicacion.OrganizacionId,
+                    DescripcionDonacion = publicacion.DetallePago,
+                };
+
+                _context.Publicacion.Add(publicacionPost);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetPublicacion", new { id = publicacionPost.Id }, publicacionPost);
+
+            }
+            else
+            {
+                return BadRequest("El Id de la organización no está especificado.");
             }
 
-
-            var publicacionPost = new Publicacion
-            {
-                Titulo = publicacion.Titulo,
-                Contenido = publicacion.Contenido,
-                OrganizacionId = publicacion.OrganizacionId,
-                DescripcionDonacion = publicacion.DetallePago,
-            };
-
-            _context.Publicacion.Add(publicacionPost);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetPublicacion", new { id = publicacionPost.Id }, publicacionPost);
         }
 
         // DELETE: api/Publicacion/5
