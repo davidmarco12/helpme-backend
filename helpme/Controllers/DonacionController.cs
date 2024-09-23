@@ -46,7 +46,7 @@ namespace helpme.Controllers
             return donacion;
         }
 
-        [HttpPost("/crear-donacion")]
+        [HttpPost("crear-donacion")]
         public async Task<ActionResult> CreateDonacion([FromBody] RequestDonacionDTO donacion)
         {
 
@@ -76,7 +76,7 @@ namespace helpme.Controllers
             {
                 BackUrls = new PreferenceBackUrlsRequest
                 {
-                    Success = "https://dexus-web.com:7146/api/donacion/actualizar-donacion?id=" + donacionId,
+                    Success = "https://dexus-web.com:3000/publication/" + donacionId,
                     Failure = "http://test.com/failure",
                     Pending = "http://test.com/pending"
                 },
@@ -161,6 +161,8 @@ namespace helpme.Controllers
 
             return NoContent();
         }
+
+       
 
         private bool DonacionExists(int id)
         {
