@@ -162,7 +162,34 @@ namespace helpme.Controllers
             return NoContent();
         }
 
-       
+        [HttpGet("publicacion/{publicacionId}")]
+        public async Task<ActionResult<IEnumerable<DonacionDTO>>> GetDonacionesByPublicacionId(int publicacionId)
+        {
+            // Verificar si la publicación existe
+            var publicacion = await _context.Publicacion.FindAsync(publicacionId);
+            if (publicacion == null)
+            {
+                return NotFound("La publicación especificada no existe.");
+            }
+
+            // Obtener todas las donaciones asociadas a la publicación
+            var donaciones = await _context.Donacion
+                .Where(d => d.PublicacionId == publicacionId && d.Estado == true)
+                .Include(d => d.Contribuyente) // Incluir el contribuyente relacionado
+                .Select(d => new DonacionDTO
+                {
+                    Mensaje = d.Mensaje,
+                    Cantidad = d.Cantidad,
+                    NombreContribuyente = d.Contribuyente != null ? d.Contribuyente.Nombre : string.Empty,
+                    ApellidoContribuyente = d.Contribuyente != null ? d.Contribuyente.Apellido : string.Empty,
+                    ImgUrlContribuyente = d.Contribuyente != null ? d.Contribuyente.Usuario.UrlImagen : string.Empty
+                })
+                .ToListAsync();
+
+            return Ok(donaciones);
+        }
+
+
 
         private bool DonacionExists(int id)
         {
@@ -178,6 +205,15 @@ namespace helpme.Controllers
             public int? OrganizacionID { get; set; }
             public int? PublicacionID { get; set; }
             public int? ContribuyenteID { get; set; }
+        }
+
+        public class DonacionDTO
+        {
+            public string Mensaje { get; set; } = string.Empty;
+            public decimal Cantidad { get; set; }
+            public string NombreContribuyente { get; set; } = string.Empty;
+            public string ApellidoContribuyente { get; set; } = string.Empty;
+            public string ImgUrlContribuyente { get; set; } = string.Empty;
         }
 
 
