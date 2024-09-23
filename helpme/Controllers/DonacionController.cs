@@ -76,7 +76,7 @@ namespace helpme.Controllers
             {
                 BackUrls = new PreferenceBackUrlsRequest
                 {
-                    Success = "https://dexus-web.com:3000/publication/" + donacionId,
+                    Success = "https://dexus-web.com:3000/publication/" + donacion.PublicacionID + "?donadorID="+ donacionId,
                     Failure = "http://test.com/failure",
                     Pending = "http://test.com/pending"
                 },
@@ -117,7 +117,7 @@ namespace helpme.Controllers
         [HttpGet("actualizar-donacion")]
         public async Task<IActionResult> PutDonacion([FromQuery] int id)
         {
-            var donacion = _context.Donacion.Find(id);
+            var donacion = await _context.Donacion.FindAsync(id);
 
             if (donacion == null) return Problem("No existe la donacion");
 
