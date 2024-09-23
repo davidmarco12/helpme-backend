@@ -12,7 +12,6 @@ namespace helpme.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class OrganizacionController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
