@@ -36,7 +36,7 @@ namespace helpme.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Publicacion>>> GetPublicacion()
         {
-            return await _context.Publicacion.ToListAsync();
+            return await _context.Publicacion.OrderByDescending(p => p.Id).ToListAsync();
         }
 
         // GET: api/Publicacion/5
