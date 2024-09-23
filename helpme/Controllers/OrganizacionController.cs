@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -106,33 +106,19 @@ namespace helpme.Controllers
             return _context.Organizacion.Any(e => e.Id == id);
         }
 
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> SyncMercadoPago(int id, Organizacion organizacion)
-        //{
-        //    if (id != organizacion.Id)
-        //    {
-        //        return BadRequest();
-        //    }
+        [HttpGet("usuario/{idUsuario}")]
+        public async Task<ActionResult<Organizacion>> GetOrganizacionByUsuarioId(int idUsuario)
+        {
+            // Buscar la organización por IdUsuario
+            var organizacion = await _context.Organizacion
+                .FirstOrDefaultAsync(o => o.IdUsuario == idUsuario);
 
-        //    _context.Entry(organizacion).State = EntityState.Modified;
+            if (organizacion == null)
+            {
+                return NotFound("No se encontró una organización para el usuario especificado.");
+            }
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!OrganizacionExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
+            return Ok(organizacion);
+        }
     }
 }
