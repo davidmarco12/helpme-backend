@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,7 +12,6 @@ namespace helpme.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ContribuyenteController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -41,6 +40,21 @@ namespace helpme.Controllers
             }
 
             return contribuyente;
+        }
+
+        [HttpGet("usuario/{idUsuario}")]
+        public async Task<ActionResult<Contribuyente>> GetContribuyenteByUsuarioId(int idUsuario)
+        {
+            // Buscar la organización por IdUsuario
+            var contribuyente = await _context.Contribuyente
+                .FirstOrDefaultAsync(o => o.IdUsuario == idUsuario);
+
+            if (contribuyente == null)
+            {
+                return NotFound("No se encontró un contribuyente para el usuario especificado.");
+            }
+
+            return Ok(contribuyente);
         }
 
         // PUT: api/Contribuyente/5
